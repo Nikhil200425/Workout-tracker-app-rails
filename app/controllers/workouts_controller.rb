@@ -1,12 +1,16 @@
+require "csv"
 class WorkoutsController < ApplicationController
   before_action :authenticate_user!
-  before_action :set_workout, only: %i[ show edit update destroy ]
+  before_action :set_workout, only: %i[ show edit update destroy]
 
   # GET /workouts or /workouts.json
   def index
-    @workouts = current_user.workouts
+    if params[:query].present?
+      @workouts = current_user.workouts.search_by_title_and_description(params[:query])
+    else
+      @workouts = current_user.workouts
+    end
   end
-
   # GET /workouts/1 or /workouts/1.json
   def show
   end
@@ -58,14 +62,24 @@ class WorkoutsController < ApplicationController
     end
   end
 
+   def download_workouts
+    workouts = current_user.workouts
+    csv_data = CSV.generate(headers: true) do |csv|
+      csv << ["Title", "Start Time", "End Time"]
+      workouts.each do |w|
+        csv << [w.title, w.start_time, w.end_time]
+      end
+    end
+    send_data csv_data, filename: "workouts.csv"
+  end
+
   private
     # Use callbacks to share common setup or constraints between actions.
     def set_workout
-      @workout = Workout.find(params.expect(:id))
+      @workout = Workout.find(params[:id])
     end
 
-    # Only allow a list of trusted parameters through.
     def workout_params
-      params.expect(workout: [ :title, :description, :start_time, :end_time, :user_id ])
+      params.require(:workout).permit(:title, :description, :start_time, :end_time, :user_id)
     end
 end

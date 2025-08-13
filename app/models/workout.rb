@@ -1,4 +1,5 @@
 class Workout < ApplicationRecord
+  include PgSearch::Model
   belongs_to :user
   validates :title, :description, :start_time, :end_time, presence: true
   validate :end_after_start
@@ -6,17 +7,19 @@ class Workout < ApplicationRecord
   validate :min_duration
   validate :min_gap
 
+  pg_search_scope :search_by_title_and_description,
+    against: [:title, :description],
+    using: {
+      tsearch: { prefix: true, any_word: true}
+    }
+    
   def status
     Time.current < end_time ? "Completed" : "Ongoing"
   end
 
-  def editable?
-    Time.current < start_time
-  end
-
   private
   def min_duration
-    if(start_time && end_time && ((end_time - start_time)/60)) < 15
+    if (start_time && end_time && ((end_time - start_time)/60)) < 15
       errors.add(:base, "Workout minimum duration is 15 min")
     end
   end

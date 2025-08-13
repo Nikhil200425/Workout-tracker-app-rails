@@ -65,3 +65,5 @@ end
 gem "rack-cors"
 gem "rspec-rails"
 gem "devise"
+gem "pg_search"
+gem "pagy"
