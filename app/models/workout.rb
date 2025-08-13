@@ -8,11 +8,11 @@ class Workout < ApplicationRecord
   validate :min_gap
 
   pg_search_scope :search_by_title_and_description,
-    against: [:title, :description],
+    against: [ :title, :description ],
     using: {
-      tsearch: { prefix: true, any_word: true}
+      tsearch: { prefix: true, any_word: true }
     }
-    
+
   def status
     Time.current < end_time ? "Completed" : "Ongoing"
   end

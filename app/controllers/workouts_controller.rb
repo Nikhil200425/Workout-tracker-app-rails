@@ -65,9 +65,9 @@ class WorkoutsController < ApplicationController
    def download_workouts
     workouts = current_user.workouts
     csv_data = CSV.generate(headers: true) do |csv|
-      csv << ["Title", "Start Time", "End Time"]
+      csv << [ "Title", "Start Time", "End Time" ]
       workouts.each do |w|
-        csv << [w.title, w.start_time, w.end_time]
+        csv << [ w.title, w.start_time, w.end_time ]
       end
     end
     send_data csv_data, filename: "workouts.csv"
